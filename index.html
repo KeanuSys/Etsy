@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etsy Listing Builder</title>
+<style>
+  :root{
+    --bg: #f6f4f1;
+    --panel: #ffffff;
+    --ink: #221c1a;
+    --ink-soft: #6b6259;
+    --line: #e5e0da;
+    --orange: #ea6c1f;
+    --orange-dark: #c9550f;
+    --orange-tint: #fdece0;
+    --green: #4a7c59;
+    --radius: 10px;
+    --shadow: 0 1px 2px rgba(33,24,15,0.06), 0 6px 20px rgba(33,24,15,0.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.4;
+  }
+
+  header.top{
+    background:var(--panel);
+    border-bottom:1px solid var(--line);
+    padding:18px 28px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  header.top .logo-mark{
+    width:34px;height:34px;border-radius:8px;
+    background:var(--orange);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:18px;font-family:Georgia, serif;
+    flex-shrink:0;
+  }
+  header.top h1{
+    font-size:18px;
+    margin:0;
+    font-weight:700;
+  }
+  header.top p{
+    margin:2px 0 0;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+
+  .layout{
+    max-width:1240px;
+    margin:0 auto;
+    padding:28px;
+    display:grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap:26px;
+    align-items:start;
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px 24px;
+    margin-bottom:20px;
+  }
+  .card h2{
+    font-size:15px;
+    margin:0 0 3px;
+    font-weight:700;
+    letter-spacing:0.2px;
+  }
+  .card .sub{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    margin:14px 0 6px;
+    color:var(--ink);
+  }
+  label:first-of-type{margin-top:0;}
+  label .hint{
+    font-weight:400;
+    color:var(--ink-soft);
+    font-size:12px;
+  }
+
+  input[type=text],
+  input[type=number],
+  textarea,
+  select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+    background:#fdfdfc;
+    color:var(--ink);
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]:focus,
+  input[type=number]:focus,
+  textarea:focus,
+  select:focus{
+    outline:none;
+    border-color:var(--orange);
+    box-shadow:0 0 0 3px var(--orange-tint);
+  }
+  textarea{resize:vertical;min-height:100px;}
+
+  .char-count{
+    text-align:right;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+  }
+  .char-count.warn{color:var(--orange-dark);font-weight:600;}
+
+  .row2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+
+  fieldset{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    margin:0;
+  }
+  fieldset legend{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    padding:0 6px;
+  }
+  .cat-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 16px;
+  }
+  .cat-grid label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:400;
+    font-size:13.5px;
+    margin:0;
+    cursor:pointer;
+  }
+  .cat-grid input[type=checkbox]{
+    accent-color:var(--orange);
+    width:16px;height:16px;
+    cursor:pointer;
+  }
+
+  .tags-preview{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin-top:8px;
+  }
+  .tag-chip{
+    background:var(--orange-tint);
+    color:var(--orange-dark);
+    font-size:12px;
+    font-weight:600;
+    padding:4px 10px;
+    border-radius:999px;
+    white-space:nowrap;
+  }
+  .tag-chip.over{
+    background:#fde3e3;
+    color:#b3261e;
+  }
+
+  /* Image uploader */
+  .upload-zone{
+    border:2px dashed var(--line);
+    border-radius:10px;
+    padding:20px;
+    text-align:center;
+    cursor:pointer;
+    background:#fdfdfc;
+    transition:border-color .15s, background .15s;
+  }
+  .upload-zone:hover, .upload-zone.drag{
+    border-color:var(--orange);
+    background:var(--orange-tint);
+  }
+  .upload-zone input{display:none;}
+  .upload-zone .icon{
+    font-size:26px;
+    color:var(--orange);
+    margin-bottom:6px;
+  }
+  .upload-zone .main-txt{
+    font-size:13.5px;
+    font-weight:600;
+  }
+  .upload-zone .sub-txt{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .thumb-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:10px;
+    margin-top:14px;
+  }
+  .thumb{
+    position:relative;
+    aspect-ratio:1/1;
+    border-radius:8px;
+    overflow:hidden;
+    border:1px solid var(--line);
+    background:#f0ede8;
+  }
+  .thumb img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .thumb .primary-badge{
+    position:absolute;
+    top:4px;left:4px;
+    background:var(--orange);
+    color:#fff;
+    font-size:9.5px;
+    font-weight:700;
+    padding:2px 6px;
+    border-radius:4px;
+    letter-spacing:.3px;
+  }
+  .thumb .rm{
+    position:absolute;
+    top:4px;right:4px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:rgba(0,0,0,0.55);
+    color:#fff;
+    border:none;
+    font-size:12px;
+    line-height:1;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .thumb-empty{
+    grid-column:span 5;
+    font-size:12px;
+    color:var(--ink-soft);
+    padding:6px 2px 0;
+  }
+
+  /* Buttons */
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:12px 20px;
+    border-radius:999px;
+    font-size:14px;
+    font-weight:700;
+    border:none;
+    cursor:pointer;
+    transition:transform .08s ease, box-shadow .15s, background .15s;
+    font-family:inherit;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{
+    background:var(--orange);
+    color:#fff;
+    box-shadow:0 4px 14px rgba(234,108,31,0.35);
+  }
+  .btn-primary:hover{background:var(--orange-dark);}
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+  }
+  .btn-ghost:hover{border-color:#c9c2b8; color:var(--ink);}
+
+  .actions-row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:6px;
+  }
+
+  /* Summary box */
+  #summaryWrap{display:none;}
+  #summaryWrap.show{display:block;}
+  #summaryBox{
+    width:100%;
+    min-height:260px;
+    font-family:'SFMono-Regular', Consolas, Menlo, monospace;
+    font-size:12.5px;
+    background:#faf8f5;
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px;
+    white-space:pre-wrap;
+    color:#3a332c;
+  }
+  .copy-note{
+    font-size:12.5px;
+    color:var(--green);
+    font-weight:600;
+    margin-top:8px;
+    display:none;
+  }
+  .copy-note.show{display:block;}
+
+  /* Right column - preview */
+  .preview-sticky{
+    position:sticky;
+    top:20px;
+  }
+  .preview-label{
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.6px;
+    color:var(--ink-soft);
+    font-weight:700;
+    margin:0 0 10px 2px;
+  }
+  .etsy-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+    box-shadow:var(--shadow);
+  }
+  .etsy-photo{
+    width:100%;
+    aspect-ratio:1/1;
+    background:#efece7 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 0h40v40H0z' fill='%23efece7'/%3E%3C/svg%3E");
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#b5aca0;
+    font-size:13px;
+    overflow:hidden;
+  }
+  .etsy-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+  .etsy-body{padding:14px 14px 16px;}
+  .etsy-shopname{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .etsy-title{
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink);
+    margin:0 0 6px;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    line-height:1.3;
+    min-height:18px;
+  }
+  .etsy-rating{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .etsy-rating .stars{color:var(--orange);}
+  .etsy-price-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+  }
+  .etsy-price{
+    font-size:16px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .etsy-badge{
+    display:inline-block;
+    margin-top:8px;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--green);
+    background:#eaf2ec;
+    padding:3px 8px;
+    border-radius:4px;
+  }
+  .etsy-qty{
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:8px;
+  }
+
+  .preview-meta{
+    margin-top:16px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px 18px;
+    box-shadow:var(--shadow);
+  }
+  .preview-meta h3{
+    font-size:13px;
+    margin:0 0 10px;
+    font-weight:700;
+  }
+  .meta-line{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    padding:5px 0;
+    border-bottom:1px dashed var(--line);
+    gap:10px;
+  }
+  .meta-line:last-child{border-bottom:none;}
+  .meta-line .k{color:var(--ink-soft);flex-shrink:0;}
+  .meta-line .v{
+    font-weight:600;
+    text-align:right;
+    word-break:break-word;
+  }
+
+  @media (max-width: 880px){
+    .layout{grid-template-columns:1fr;}
+    .preview-sticky{position:static;}
+    .row2{grid-template-columns:1fr;}
+    .cat-grid{grid-template-columns:1fr;}
+    .thumb-grid{grid-template-columns:repeat(3,1fr);}
+  }
+
+  :focus-visible{outline:2px solid var(--orange-dark); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="logo-mark">E</div>
+  <div>
+    <h1>New Listing Builder</h1>
+    <p>Fill out the fields — the preview on the right updates as you go.</p>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT: FORM -->
+  <div>
+
+    <div class="card">
+      <h2>Photo &amp; Video</h2>
+      <p class="sub">Add up to 5 photos. The first photo becomes your primary listing image.</p>
+
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="imageInput" accept="image/*" multiple>
+        <div class="icon">＋</div>
+        <div class="main-txt">Click to upload or drag and drop</div>
+        <div class="sub-txt">PNG or JPG, up to 5 images</div>
+      </div>
+      <div class="thumb-grid" id="thumbGrid">
+        <div class="thumb-empty" id="thumbEmptyMsg">No photos uploaded yet.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Item Details</h2>
+      <p class="sub">Help buyers understand your item.</p>
+
+      <label for="category">Category</label>
+      <fieldset>
+        <legend>Select all that apply</legend>
+        <div class="cat-grid" id="catGrid">
+          <label><input type="checkbox" name="cat" value="Home & Living"> Home &amp; Living</label>
+          <label><input type="checkbox" name="cat" value="Jewelry"> Jewelry</label>
+          <label><input type="checkbox" name="cat" value="Clothing"> Clothing</label>
+          <label><input type="checkbox" name="cat" value="Art & Collectibles"> Art &amp; Collectibles</label>
+          <label><input type="checkbox" name="cat" value="Craft Supplies"> Craft Supplies</label>
+          <label><input type="checkbox" name="cat" value="Toys & Games"> Toys &amp; Games</label>
+          <label><input type="checkbox" name="cat" value="Weddings"> Weddings</label>
+          <label><input type="checkbox" name="cat" value="Vintage"> Vintage</label>
+        </div>
+      </fieldset>
+
+      <label for="madeWhen">When was it made?</label>
+      <select id="madeWhen">
+        <option value="">Select an option</option>
+        <option>Made to order</option>
+        <option>2020-2026</option>
+        <option>2010-2019</option>
+        <option>2000-2009</option>
+        <option>Before 2000</option>
+      </select>
+
+      <label for="titleInput">Title <span class="hint">— max 140 characters</span></label>
+      <input type="text" id="titleInput" maxlength="140" placeholder="e.g. Hand-poured Soy Candle, Lavender Scented, Gift for Her">
+      <div class="char-count" id="titleCount">0 / 140</div>
+
+      <label for="descInput">Description</label>
+      <textarea id="descInput" placeholder="What makes your item special? Buyers will only see the first few lines unless they expand the description."></textarea>
+    </div>
+
+    <div class="card">
+      <h2>Item Options</h2>
+      <p class="sub">Let buyers know what choices are available.</p>
+
+      <label for="tagsInput">Tags <span class="hint">— up to 13, comma-separated</span></label>
+      <input type="text" id="tagsInput" placeholder="e.g. candle, gift for her, lavender, handmade">
+      <div class="tags-preview" id="tagsPreview"></div>
+    </div>
+
+    <div class="card">
+      <h2>Pricing &amp; Delivery</h2>
+      <p class="sub">Set your price and how many are available.</p>
+
+      <div class="row2">
+        <div>
+          <label for="priceInput">Price (CA$)</label>
+          <input type="number" id="priceInput" min="0" step="0.01" placeholder="0.00">
+        </div>
+        <div>
+          <label for="qtyInput">Quantity</label>
+          <input type="number" id="qtyInput" min="0" step="1" placeholder="1">
+        </div>
+      </div>
+
+      <label for="processing">Processing profile</label>
+      <select id="processing">
+        <option value="">Select an option</option>
+        <option>Ready to dispatch (1-2 days)</option>
+        <option>1-3 business days</option>
+        <option>3-5 business days</option>
+        <option>1-2 weeks</option>
+        <option>Made to order (2-4 weeks)</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <h2>How It's Made</h2>
+      <p class="sub">This helps show what makes your item special.</p>
+
+      <div class="row2">
+        <div>
+          <label for="whoMade">Who made it?</label>
+          <select id="whoMade">
+            <option value="">Select an option</option>
+            <option>I did</option>
+            <option>A member of my shop</option>
+            <option>Another company or person</option>
+          </select>
+        </div>
+        <div>
+          <label for="whatIs">What is it?</label>
+          <select id="whatIs">
+            <option value="">Select an option</option>
+            <option>A finished product</option>
+            <option>A supply or tool to make things</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Generate Summary</h2>
+      <p class="sub">Compile everything above into a clean summary you can paste anywhere.</p>
+      <div class="actions-row">
+        <button class="btn btn-primary" id="generateBtn">📋 Generate Listing Summary</button>
+        <button class="btn btn-ghost" id="resetBtn">↺ Reset Form</button>
+      </div>
+
+      <div id="summaryWrap">
+        <div class="copy-note" id="copyNote">✓ Copied to clipboard</div>
+        <label style="margin-top:16px;">Listing Summary</label>
+        <div id="summaryBox"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="preview-sticky">
+    <div class="preview-label">Etsy Mockup Preview</div>
+
+    <div class="etsy-card">
+      <div class="etsy-photo" id="previewPhoto">No photo yet</div>
+      <div class="etsy-body">
+        <div class="etsy-shopname">YourShopName</div>
+        <div class="etsy-title" id="previewTitle">Your listing title will appear here</div>
+        <div class="etsy-rating"><span class="stars">★★★★★</span> (128)</div>
+        <div class="etsy-price-row">
+          <span class="etsy-price" id="previewPrice">CA$0.00</span>
+        </div>
+        <div class="etsy-qty" id="previewQty"></div>
+        <span class="etsy-badge" id="previewBadge" style="display:none;">Bestseller</span>
+      </div>
+    </div>
+
+    <div class="preview-meta">
+      <h3>Listing At a Glance</h3>
+      <div class="meta-line"><span class="k">Category</span><span class="v" id="metaCategory">—</span></div>
+      <div class="meta-line"><span class="k">Quantity</span><span class="v" id="metaQty">—</span></div>
+      <div class="meta-line"><span class="k">Tags</span><span class="v" id="metaTags">—</span></div>
+      <div class="meta-line"><span class="k">Photos</span><span class="v" id="metaPhotos">0 / 5</span></div>
+      <div class="meta-line"><span class="k">Processing</span><span class="v" id="metaProcessing">—</span></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const MAX_IMAGES = 5;
+  const MAX_TAGS = 13;
+  let images = []; // { url }
+
+  const titleInput = document.getElementById('titleInput');
+  const titleCount = document.getElementById('titleCount');
+  const descInput = document.getElementById('descInput');
+  const tagsInput = document.getElementById('tagsInput');
+  const tagsPreview = document.getElementById('tagsPreview');
+  const priceInput = document.getElementById('priceInput');
+  const qtyInput = document.getElementById('qtyInput');
+  const processing = document.getElementById('processing');
+  const madeWhen = document.getElementById('madeWhen');
+  const whoMade = document.getElementById('whoMade');
+  const whatIs = document.getElementById('whatIs');
+  const catGrid = document.getElementById('catGrid');
+
+  const previewPhoto = document.getElementById('previewPhoto');
+  const previewTitle = document.getElementById('previewTitle');
+  const previewPrice = document.getElementById('previewPrice');
+  const previewQty = document.getElementById('previewQty');
+  const previewBadge = document.getElementById('previewBadge');
+
+  const metaCategory = document.getElementById('metaCategory');
+  const metaQty = document.getElementById('metaQty');
+  const metaTags = document.getElementById('metaTags');
+  const metaPhotos = document.getElementById('metaPhotos');
+  const metaProcessing = document.getElementById('metaProcessing');
+
+  const uploadZone = document.getElementById('uploadZone');
+  const imageInput = document.getElementById('imageInput');
+  const thumbGrid = document.getElementById('thumbGrid');
+  const thumbEmptyMsg = document.getElementById('thumbEmptyMsg');
+
+  const generateBtn = document.getElementById('generateBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const summaryWrap = document.getElementById('summaryWrap');
+  const summaryBox = document.getElementById('summaryBox');
+  const copyNote = document.getElementById('copyNote');
+
+  function getSelectedCategories(){
+    return Array.from(catGrid.querySelectorAll('input[type=checkbox]:checked')).map(c => c.value);
+  }
+
+  function getTags(){
+    return tagsInput.value.split(',').map(t => t.trim()).filter(Boolean);
+  }
+
+  function renderTags(){
+    const tags = getTags();
+    tagsPreview.innerHTML = '';
+    tags.forEach((tag, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'tag-chip' + (i >= MAX_TAGS ? ' over' : '');
+      chip.textContent = tag;
+      tagsPreview.appendChild(chip);
+    });
+    metaTags.textContent = tags.length ? tags.slice(0, MAX_TAGS).join(', ') : '—';
+  }
+
+  function renderThumbs(){
+    thumbGrid.innerHTML = '';
+    if(images.length === 0){
+      thumbGrid.appendChild(thumbEmptyMsg);
+    } else {
+      images.forEach((img, i) => {
+        const t = document.createElement('div');
+        t.className = 'thumb';
+        t.innerHTML = `
+          ${i === 0 ? '<span class="primary-badge">PRIMARY</span>' : ''}
+          <img src="${img.url}" alt="Uploaded photo ${i+1}">
+          <button class="rm" data-i="${i}" aria-label="Remove photo" title="Remove">✕</button>
+        `;
+        thumbGrid.appendChild(t);
+      });
+    }
+    metaPhotos.textContent = `${images.length} / ${MAX_IMAGES}`;
+    updatePreviewPhoto();
+  }
+
+  function updatePreviewPhoto(){
+    if(images.length > 0){
+      previewPhoto.innerHTML = `<img src="${images[0].url}" alt="Primary listing photo">`;
+    } else {
+      previewPhoto.innerHTML = 'No photo yet';
+    }
+  }
+
+  function handleFiles(fileList){
+    const files = Array.from(fileList).filter(f => f.type.startsWith('image/'));
+    for(const file of files){
+      if(images.length >= MAX_IMAGES) break;
+      const url = URL.createObjectURL(file);
+      images.push({ url });
+    }
+    renderThumbs();
+  }
+
+  uploadZone.addEventListener('click', () => imageInput.click());
+  imageInput.addEventListener('change', e => handleFiles(e.target.files));
+
+  ['dragover','dragenter'].forEach(evt => {
+    uploadZone.addEventListener(evt, e => {
+      e.preventDefault();
+      uploadZone.classList.add('drag');
+    });
+  });
+  ['dragleave','drop'].forEach(evt => {
+    uploadZone.addEventListener(evt, e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag');
+    });
+  });
+  uploadZone.addEventListener('drop', e => {
+    if(e.dataTransfer && e.dataTransfer.files) handleFiles(e.dataTransfer.files);
+  });
+
+  thumbGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.rm');
+    if(!btn) return;
+    const i = parseInt(btn.dataset.i, 10);
+    images.splice(i, 1);
+    renderThumbs();
+  });
+
+  function updatePreview(){
+    const title = titleInput.value.trim();
+    previewTitle.textContent = title || 'Your listing title will appear here';
+
+    const price = parseFloat(priceInput.value);
+    previewPrice.textContent = 'CA$' + (isNaN(price) ? '0.00' : price.toFixed(2));
+
+    const qty = parseInt(qtyInput.value, 10);
+    previewQty.textContent = (!isNaN(qty) && qty > 0) ? `${qty} in stock` : '';
+
+    previewBadge.style.display = (!isNaN(qty) && qty > 0 && !isNaN(price)) ? 'inline-block' : 'none';
+
+    const cats = getSelectedCategories();
+    metaCategory.textContent = cats.length ? cats.join(', ') : '—';
+    metaQty.textContent = (!isNaN(qty) && qtyInput.value !== '') ? qty : '—';
+    metaProcessing.textContent = processing.value || '—';
+  }
+
+  function updateTitleCount(){
+    const len = titleInput.value.length;
+    titleCount.textContent = `${len} / 140`;
+    titleCount.classList.toggle('warn', len >= 130);
+  }
+
+  [titleInput, priceInput, qtyInput, processing].forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+  catGrid.addEventListener('change', updatePreview);
+  titleInput.addEventListener('input', updateTitleCount);
+  tagsInput.addEventListener('input', renderTags);
+
+  function buildSummary(){
+    const title = titleInput.value.trim() || '(not set)';
+    const desc = descInput.value.trim() || '(not set)';
+    const cats = getSelectedCategories();
+    const tags = getTags();
+    const price = priceInput.value ? `CA$${parseFloat(priceInput.value).toFixed(2)}` : '(not set)';
+    const qty = qtyInput.value || '(not set)';
+
+    const lines = [
+      'ETSY LISTING SUMMARY',
+      '='.repeat(40),
+      '',
+      `Title: ${title}`,
+      `Category: ${cats.length ? cats.join(', ') : '(not set)'}`,
+      `When was it made: ${madeWhen.value || '(not set)'}`,
+      '',
+      `Description:`,
+      desc,
+      '',
+      `Tags (${tags.length}/13): ${tags.length ? tags.join(', ') : '(none)'}`,
+      '',
+      `Price: ${price}`,
+      `Quantity: ${qty}`,
+      `Processing profile: ${processing.value || '(not set)'}`,
+      '',
+      `Who made it: ${whoMade.value || '(not set)'}`,
+      `What is it: ${whatIs.value || '(not set)'}`,
+      '',
+      `Photos uploaded: ${images.length} / 5`,
+    ];
+    return lines.join('\n');
+  }
+
+  generateBtn.addEventListener('click', async () => {
+    const summary = buildSummary();
+    summaryBox.textContent = summary;
+    summaryWrap.classList.add('show');
+    copyNote.classList.remove('show');
+
+    try{
+      await navigator.clipboard.writeText(summary);
+      copyNote.classList.add('show');
+    }catch(err){
+      // clipboard may be blocked; fall back silently, summary is still visible/selectable
+      copyNote.textContent = 'Summary ready — select the text above to copy manually.';
+      copyNote.classList.add('show');
+    }
+    summaryWrap.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if(!confirm('Reset the form? All fields and photos will be cleared.')) return;
+    titleInput.value = '';
+    descInput.value = '';
+    tagsInput.value = '';
+    priceInput.value = '';
+    qtyInput.value = '';
+    processing.value = '';
+    madeWhen.value = '';
+    whoMade.value = '';
+    whatIs.value = '';
+    catGrid.querySelectorAll('input[type=checkbox]').forEach(c => c.checked = false);
+    images = [];
+    renderThumbs();
+    renderTags();
+    updatePreview();
+    updateTitleCount();
+    summaryWrap.classList.remove('show');
+    summaryBox.textContent = '';
+    copyNote.classList.remove('show');
+  });
+
+  // init
+  renderThumbs();
+  renderTags();
+  updatePreview();
+  updateTitleCount();
+})();
+</script>
+
+</body>
+</html>
